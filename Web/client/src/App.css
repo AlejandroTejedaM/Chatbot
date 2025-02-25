@@ -1,0 +1,11 @@
+.chat-container {
+    background-color: #f8f9fa;
+}
+
+.message {
+    word-break: break-word;
+}
+
+.message.bg-light {
+    border: 1px solid #dee2e6;
+}
