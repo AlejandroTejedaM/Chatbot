@@ -8,6 +8,45 @@ function App() {
     ]);
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsloading] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+
+    const startVoiceRecognition = async () => {
+        setIsListening(true);
+        setIsloading(true);
+
+        try {
+            // Add visual feedback
+            setMessages(prev => [...prev, {
+                text: "Escuchando... Por favor, hable ahora.",
+                isBot: true
+            }]);
+            const response = await axios.get('http://localhost:8000/voz', {
+                timeout: 60000
+            });
+
+            if (response.data.status === 'success') {
+                const {pregunta, respuesta} = response.data;
+                if (pregunta) {
+                    setMessages(prev => [...prev, {text: pregunta, isBot: false}]);
+                    setMessages(prev => [...prev, {text: respuesta, isBot: true}]);
+                }
+            } else if (response.data.status === 'timeout') {
+                setMessages(prev => [...prev, {
+                    text: "Lo siento, no escuché nada. Por favor, inténtalo de nuevo.",
+                    isBot: true
+                }]);
+            }
+        } catch (e) {
+            console.error('Error:', e);
+            setMessages(prev => [...prev, {
+                text: "Error al procesar el audio. Por favor, inténtalo de nuevo.",
+                isBot: true
+            }]);
+        } finally {
+            setIsloading(false);
+            setIsListening(false);
+        }
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!inputMessage.trim()) return;
@@ -33,18 +72,13 @@ function App() {
         setInputMessage('');
     };
 
-    //Webhook es una forma de comunicación entre aplicaciones, en este caso, entre el chatbot y el servidor.
-    //Asi
-    useEffect(() => {
-
-    }, []);
     //HTML
     return (
-        <div className="container mt-5">
+        <div className="container mt-5 bg-opacity-10 bg-secondary">
             <div className="row justify-content-center">
                 <div className="col-md-8">
-                    <div className="card">
-                        <div className="card-header bg-primary text-black">
+                    <div className="card bg-secondary">
+                        <div className="card-header bg-black text-white text-center">
                             <h2 className="mb-0">Chat</h2>
                         </div>
                         <div className="card-body chat-container" style={{height: '400px', overflowY: 'auto'}}>
@@ -72,12 +106,22 @@ function App() {
                                     <input
                                         type="text"
                                         className="form-control"
-                                        placeholder="Type your message..."
+                                        placeholder="Escribe tu mensaje..."
                                         value={inputMessage}
                                         onChange={(e) => setInputMessage(e.target.value)}
                                     />
-                                    <button className="btn btn-primary" type="submit">
+                                    <button className="btn btn-dark" type="submit">
                                         Enviar
+                                    </button>
+                                    <button
+                                        className={`btn ${isListening ? 'btn-danger' : 'btn-success'}`}
+                                        type={'button'}
+                                        onClick={startVoiceRecognition}
+                                        disabled={isListening}
+                                    >
+                                        <i className={`bi ${isListening ? 'bi-mic-fill' : 'bi-mic'}`}></i>
+                                        {' '}
+                                        {isListening ? 'Escuchando...' : 'Usar Voz'}
                                     </button>
                                 </div>
                             </form>
