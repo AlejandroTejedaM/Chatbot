@@ -45,12 +45,10 @@ KNOWLEDGE_NODES = [
     ("Estrategias Visuales", "Uso de colores y símbolos"),
 
 
-    # Nuevos KNOWLEDGE_NODES relacionados con cursos
     ("Cursos", "Cursos de Repetición"),
     ("Cursos", "Cursos de Pronunciación"),
     ("Cursos", "Cursos de Vocabulario"),
 
-    # Detalles de los cursos
     ("Cursos de Repetición", "Retroalimentación IA"),
     ("Cursos de Repetición", "Métricas de Progreso"),
     ("Cursos de Repetición", "Ejercicios Adaptivos"),
