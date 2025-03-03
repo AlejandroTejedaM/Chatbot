@@ -1,6 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-
+import re
 GRAPH = nx.DiGraph()
 
 KNOWLEDGE_NODES = [
@@ -49,6 +49,7 @@ KNOWLEDGE_NODES = [
     ("Cursos", "Cursos de Pronunciación"),
     ("Cursos", "Cursos de Vocabulario"),
 
+    # Detalles de los cursos
     ("Cursos de Repetición", "Retroalimentación IA"),
     ("Cursos de Repetición", "Métricas de Progreso"),
     ("Cursos de Repetición", "Ejercicios Adaptivos"),
@@ -84,23 +85,28 @@ def responder_pregunta(pregunta):
     pregunta = pregunta.lower()
     pregunta = pregunta.replace("¿", "").replace("?", "")  # Remove question marks
 
-    # Pregunta: ¿Qué es?
-    if "qué es" in pregunta:
+    # Using regex for "qué es" or "que es"
+    patron_que_es = re.compile(r"qu[eé]\s+es\s+(.+)")
+    match = patron_que_es.search(pregunta)
+    if match:
         for nodo in GRAPH.nodes:
-            subtemas = list(GRAPH.successors(nodo))
-            predecesores = list(GRAPH.predecessors(nodo))
+            if nodo.lower() in pregunta:  # Check if node name is mentioned
+                subtemas = list(GRAPH.successors(nodo))
+                predecesores = list(GRAPH.predecessors(nodo))
+                if subtemas and predecesores:
+                    return f"{nodo} es un concepto que forma parte de {', '.join(predecesores)} y incluye: {', '.join(subtemas)}."
+                elif subtemas:
+                    return f"{nodo} es un área que incluye los siguientes conceptos: {', '.join(subtemas)}."
+                elif predecesores:
+                    return f"{nodo} es un concepto específico dentro de {', '.join(predecesores)}."
+                else:
+                    return f"{nodo} es un concepto final en nuestro sistema de enseñanza."
 
-            if subtemas and predecesores:
-                return f"{nodo} es un concepto que forma parte de {', '.join(predecesores)} y incluye: {', '.join(subtemas)}."
-            elif subtemas:
-                return f"{nodo} es un área que incluye los siguientes conceptos: {', '.join(subtemas)}."
-            elif predecesores:
-                return f"{nodo} es un concepto específico dentro de {', '.join(predecesores)}."
-            else:
-                return f"{nodo} es un concepto final en nuestro sistema de enseñanza."
-
+    # Using regex for "cómo" or "como"
+    patron_que_es = re.compile(r"c[oó]mo\s+(.+)")
+    match = patron_que_es.search(pregunta)
     # Pregunta: ¿Cómo?
-    if "cómo" in pregunta:  # Check if question contains "cómo"
+    if match:
         for nodo in GRAPH.nodes:
             if nodo.lower() in pregunta:  # Check if node name is mentioned
                 subtemas = list(GRAPH.successors(nodo))
@@ -138,7 +144,7 @@ def responder_pregunta(pregunta):
     if "hola" in pregunta:
         return "¡Hola! Puedo ayudarte con información sobre enseñanza del habla, actividades, recursos y estrategias."
 
-    if "adiós" or "adios" in pregunta:
+    if "adiós" in pregunta:
         return "¡Hasta luego! Espero que la información haya sido útil."
 
     return "No tengo información específica sobre esa pregunta. Prueba preguntando sobre actividades, recursos o estrategias específicas."
